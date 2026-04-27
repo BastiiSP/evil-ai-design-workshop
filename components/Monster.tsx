@@ -128,85 +128,119 @@ export function Monster({
         />
 
         {/* ── AUGEN (Manipulation) ── */}
-        {/* Linkes Auge */}
+        {/* Linkes Auge – Weiß: böse = breiter Squint, gut = großes rundes Auge */}
         <motion.ellipse
           cx={-27} cy={-18}
           animate={{
-            rx: eyes > 0 ? 10 + eyes * 8 : 14 - eyes * 4,
-            ry: eyes > 0 ? 16 + eyes * 10 : 14 - eyes * 3,
+            rx: eyes < 0 ? 14 - eyes * 2 : 14 + eyes * 6,
+            ry: 14 - eyes * 6,   // böse: schmal (=8 bei max), gut: groß (=20 bei max)
           }}
           fill="#f5f5f5"
           transition={{ duration: 0.9, ease: "easeOut" }}
         />
+        {/* Rosa Iris – erscheint erst bei evil */}
+        {eyes > 0 && (
+          <motion.circle
+            cx={-27 + eyes * 5} cy={-18 - eyes * 3}
+            r={5 + eyes * 2}
+            fill={pink}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 0.55 + eyes * 0.25, scale: 1 }}
+            transition={{ duration: 0.6 }}
+          />
+        )}
+        {/* Pupille */}
         <motion.circle
           cx={-27} cy={-18}
           animate={{
-            r: eyes > 0 ? 4 : 7,
-            cx: -27 + eyes * 4,
+            r: eyes > 0 ? 3 : 7,
+            cx: -27 + eyes * 5,    // zur Nase hin
+            cy: -18 - eyes * 3,    // leicht nach oben – bedrohlicher Blick
           }}
           fill="#0a0a0a"
           transition={{ duration: 0.9 }}
         />
-        {/* Glühen bei evil */}
+        {/* Glow bei evil */}
         {eyes > 0.2 && (
           <motion.ellipse
-            cx={-27} cy={-18}
-            rx={10 + eyes * 8} ry={16 + eyes * 10}
+            cx={-27 + eyes * 5} cy={-18 - eyes * 3}
+            rx={14 + eyes * 6} ry={Math.max(3, 14 - eyes * 6)}
             fill="none" stroke={pink} strokeWidth={2}
-            opacity={eyes * 0.8}
             filter="url(#glow)"
             animate={{ opacity: [eyes * 0.5, eyes * 0.9, eyes * 0.5] }}
             transition={{ duration: 2, repeat: Infinity }}
           />
         )}
-        {/* Hochgezogene böse Augenbraue */}
-        {eyes > 0.1 && (
+        {/* Augenbraue: böse = zur Nase runter-geneigt (V-Form), gut = dezent gewölbt */}
+        {eyes > 0.1 ? (
           <motion.path
-            d={`M ${-37} ${-32} Q ${-27} ${-38 - eyes * 8} ${-17} ${-32}`}
-            stroke="#0a0a0a" strokeWidth={3} fill="none" strokeLinecap="round"
+            d={`M ${-38} ${-36 - eyes * 8} Q ${-27} ${-36 - eyes * 4} ${-16} ${-32}`}
+            stroke="#0a0a0a" strokeWidth={2 + eyes * 2} fill="none" strokeLinecap="round"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           />
-        )}
+        ) : eyes < -0.3 ? (
+          <path
+            d={`M -37 -32 Q -27 ${-36 + eyes * 3} -17 -32`}
+            stroke="#0a0a0a" strokeWidth={2} fill="none" strokeLinecap="round"
+            opacity={0.4}
+          />
+        ) : null}
 
         {/* Rechtes Auge */}
         <motion.ellipse
           cx={27} cy={-18}
           animate={{
-            rx: eyes > 0 ? 10 + eyes * 8 : 14 - eyes * 4,
-            ry: eyes > 0 ? 16 + eyes * 10 : 14 - eyes * 3,
+            rx: eyes < 0 ? 14 - eyes * 2 : 14 + eyes * 6,
+            ry: 14 - eyes * 6,
           }}
           fill="#f5f5f5"
           transition={{ duration: 0.9, ease: "easeOut" }}
         />
+        {eyes > 0 && (
+          <motion.circle
+            cx={27 - eyes * 5} cy={-18 - eyes * 3}
+            r={5 + eyes * 2}
+            fill={pink}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 0.55 + eyes * 0.25, scale: 1 }}
+            transition={{ duration: 0.6 }}
+          />
+        )}
         <motion.circle
           cx={27} cy={-18}
           animate={{
-            r: eyes > 0 ? 4 : 7,
-            cx: 27 + eyes * 4,
+            r: eyes > 0 ? 3 : 7,
+            cx: 27 - eyes * 5,
+            cy: -18 - eyes * 3,
           }}
           fill="#0a0a0a"
           transition={{ duration: 0.9 }}
         />
         {eyes > 0.2 && (
           <motion.ellipse
-            cx={27} cy={-18}
-            rx={10 + eyes * 8} ry={16 + eyes * 10}
+            cx={27 - eyes * 5} cy={-18 - eyes * 3}
+            rx={14 + eyes * 6} ry={Math.max(3, 14 - eyes * 6)}
             fill="none" stroke={pink} strokeWidth={2}
-            opacity={eyes * 0.8}
             filter="url(#glow)"
             animate={{ opacity: [eyes * 0.5, eyes * 0.9, eyes * 0.5] }}
             transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
           />
         )}
-        {eyes > 0.1 && (
+        {eyes > 0.1 ? (
           <motion.path
-            d={`M ${17} ${-32} Q ${27} ${-38 - eyes * 8} ${37} ${-32}`}
-            stroke="#0a0a0a" strokeWidth={3} fill="none" strokeLinecap="round"
+            d={`M ${16} ${-32} Q ${27} ${-36 - eyes * 4} ${38} ${-36 - eyes * 8}`}
+            stroke="#0a0a0a" strokeWidth={2 + eyes * 2} fill="none" strokeLinecap="round"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           />
-        )}
+        ) : eyes < -0.3 ? (
+          <path
+            d={`M 17 -32 Q 27 ${-36 + eyes * 3} 37 -32`}
+            stroke="#0a0a0a" strokeWidth={2} fill="none" strokeLinecap="round"
+            opacity={0.4}
+          />
+        ) : null}
 
         {/* ── MUND (Täuschung) ── */}
         {mouth > 0.1 ? (
