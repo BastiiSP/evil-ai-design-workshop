@@ -28,8 +28,8 @@ export default function LandingPage() {
         </h1>
 
         <p className="text-lg text-[var(--color-fg-muted)] leading-relaxed">
-          Scanne den QR-Code oder öffne den Link auf deinem Smartphone,
-          um beim Workshop mitzumachen.
+          Scanne den QR-Code mit deinem Smartphone,
+          um live dabei zu sein.
         </p>
 
         {playUrl && <QrCode value={playUrl} size={240} />}

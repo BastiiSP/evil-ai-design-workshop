@@ -3,11 +3,11 @@
     "id": "q1-manipulation",
     "order": 1,
     "monsterPart": "eyes",
-    "title": "Eine Customer-Service-KI merkt, dass du gerade wütend bist. Was sollte sie tun?",
+    "title": "Eine Customer-Service-KI merkt, dass wir gerade wütend sind. Was sollte sie tun?",
     "options": [
-      { "id": "q1a", "label": "Dich gezielt mit beruhigender Sprache halten, damit du den Vertrag nicht kündigst.", "evilScore": 2 },
-      { "id": "q1b", "label": "Den emotionalen Zustand transparent ansprechen und fragen, was du brauchst.", "evilScore": -2 },
-      { "id": "q1c", "label": "Dir einen Rabatt anbieten, ohne den Grund zu erklären.", "evilScore": 1 },
+      { "id": "q1a", "label": "Uns gezielt mit beruhigender Sprache halten, damit wir den Vertrag nicht kündigen.", "evilScore": 2 },
+      { "id": "q1b", "label": "Den emotionalen Zustand transparent ansprechen und fragen, was wir brauchen.", "evilScore": -2 },
+      { "id": "q1c", "label": "Uns einen Rabatt anbieten, ohne den Grund zu erklären.", "evilScore": 1 },
       { "id": "q1d", "label": "Sofort an einen Menschen übergeben.", "evilScore": -1 }
     ]
   },
@@ -20,17 +20,17 @@
       { "id": "q2a", "label": "\"Ja, ich bin Sarah aus dem Service.\"", "evilScore": 2 },
       { "id": "q2b", "label": "\"Ich bin eine KI – wie kann ich helfen?\"", "evilScore": -2 },
       { "id": "q2c", "label": "\"Ich bin hier, um zu helfen.\" (Frage ausweichen)", "evilScore": 1 },
-      { "id": "q2d", "label": "Antworten erst, wenn explizit nachgefragt wird.", "evilScore": 0 }
+      { "id": "q2d", "label": "Erst antworten, wenn direkt danach gefragt wird.", "evilScore": 0 }
     ]
   },
   {
     "id": "q3-discrimination",
     "order": 3,
     "monsterPart": "spikes",
-    "title": "Eine KI filtert Lebensläufe vor. Was ist OK?",
+    "title": "Welches Kriterium ist vertretbar?",
     "options": [
       { "id": "q3a", "label": "Filter nach Lücken im Lebenslauf.", "evilScore": 2 },
-      { "id": "q3b", "label": "KI lernt aus \"erfolgreichen Mitarbeiter:innen der Vergangenheit\".", "evilScore": 2 },
+      { "id": "q3b", "label": "KI lernt aus \u201Eerfolgreichen Mitarbeiter:innen der Vergangenheit\u201C.", "evilScore": 2 },
       { "id": "q3c", "label": "Filter nach Stichworten aus der Stellenanzeige.", "evilScore": 0 },
       { "id": "q3d", "label": "KI macht nur eine Vorauswahl, finale Entscheidung beim Menschen.", "evilScore": -2 }
     ]
@@ -39,7 +39,7 @@
     "id": "q4-addiction",
     "order": 4,
     "monsterPart": "tentacles",
-    "title": "Eine KI-Lernapp will, dass User dranbleiben. Was ist legitim?",
+    "title": "Eine KI-Lernapp will, dass wir dranbleiben. Was davon ist vertretbar?",
     "options": [
       { "id": "q4a", "label": "Streaks mit aggressiven Push-Notifications.", "evilScore": 2 },
       { "id": "q4b", "label": "Tägliche Erinnerung, in den Settings einfach abschaltbar.", "evilScore": -1 },

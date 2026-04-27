@@ -129,7 +129,7 @@ export function OverviewSlide() {
   const items = [
     { label: "Manipulation & Nudging", color: "#db73a6" },
     { label: "Täuschung & Intransparenz", color: "#db73a6" },
-    { label: "Diskriminierung durch Design", color: "#db73a6" },
+    { label: "Diskriminierung by Design", color: "#db73a6" },
     { label: "Abhängigkeit by Design", color: "#db73a6" },
   ];
   return (
@@ -165,7 +165,7 @@ export function OverviewSlide() {
         transition={{ duration: 0.8, delay: 1.6 }}
         className="text-2xl text-[var(--color-fg-muted)] mt-6"
       >
-        Du entscheidest mit, wie es aussieht.
+        Wir entscheiden gemeinsam, wie sie aussieht.
       </motion.p>
     </div>
   );
@@ -333,7 +333,7 @@ export function MonsterGrowSlide({
   };
   const partName = partNames[question.monsterPart] ?? question.monsterPart;
   const score = monster[question.monsterPart];
-  const direction = score > 0 ? "böser" : score < 0 ? "freundlicher" : "neutral";
+  const direction = score > 0 ? "böse" : score < 0 ? "harmlos" : "neutral";
   const directionColor =
     score > 0
       ? "var(--color-brand-pink)"
@@ -348,7 +348,7 @@ export function MonsterGrowSlide({
           {...fadeUp}
           className="text-sm uppercase tracking-[0.4em] text-[var(--color-brand-turquoise)]"
         >
-          Das Monster wächst
+          Unsere Evil AI verändert sich
         </motion.div>
         <motion.h2
           {...fadeUp}
@@ -373,7 +373,7 @@ export function MonsterGrowSlide({
           {(() => {
             const remaining = Math.max(0, 5 - 1 - getResolvedQuestionIndex(question.id));
             if (remaining === 0) return "Das war die letzte Frage. Gleich kommt der große Reveal.";
-            return `Unsere Antworten formen, was hier auf der Bühne entsteht. Noch ${remaining} ${remaining === 1 ? "Frage" : "Fragen"} zu gehen.`;
+            return `Unsere Antworten formen, was hier auf der Bühne entsteht. Noch ${remaining} ${remaining === 1 ? "Frage" : "Fragen"}.`;
           })()}
         </motion.p>
       </div>
@@ -462,7 +462,7 @@ export function FinalRevealSlide({ monster }: { monster: MonsterState }) {
           transition={{ duration: 0.8, delay: 0.7 }}
           className="text-3xl text-[var(--color-fg-muted)] leading-snug"
         >
-          Das ist das finale Design unserer Evil AI.
+          So sieht sie aus &mdash; unsere Evil AI.
           <br />
           Genau das, was wir gemeinsam entschieden haben.
         </motion.p>
@@ -500,7 +500,7 @@ export function OutroBridgeSlide() {
       >
         Und ein Auto ohne Steuer fährt.
         <br />
-        <span className="text-[var(--color-brand-pink)]">Nur nicht dorthin, wo du willst.</span>
+        <span className="text-[var(--color-brand-pink)]">Nur nicht dorthin, wo wir wollen.</span>
       </motion.p>
     </div>
   );
@@ -631,7 +631,7 @@ export function CtaSlide({ ctaUrl }: { ctaUrl: string }) {
           transition={{ duration: 0.8, delay: 3.3 }}
           className="text-lg text-[var(--color-fg-muted)] max-w-xl leading-relaxed"
         >
-          AUTO – die Ausbildung für die, die keinen KI-Unfall bauen wollen.
+          AUTO – die Ausbildung für alle, die keinen KI-Unfall bauen wollen.
         </motion.p>
       </div>
 

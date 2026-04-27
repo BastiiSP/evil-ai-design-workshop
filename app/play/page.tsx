@@ -127,7 +127,7 @@ export default function PlayPage() {
               Schau auf den Beamer.
             </h2>
             <p className="text-sm text-[var(--color-fg-muted)]">
-              Gleich geht&apos;s los. Die nächste Frage erscheint hier automatisch.
+              Gleich geht&apos;s los. Leg das Handy kurz zur Seite &mdash; wir starten gemeinsam.
             </p>
           </motion.section>
         )}
@@ -216,7 +216,7 @@ export default function PlayPage() {
               style={{ background: "var(--color-brand-pink)" }}
             />
             <h2 className="text-2xl font-light leading-snug mt-2">
-              Ergebnisse auf dem Beamer.
+              Schau auf die Leinwand &mdash; die Ergebnisse sind live.
             </h2>
             <p className="text-sm text-[var(--color-fg-muted)] max-w-xs">
               Die nächste Frage kommt gleich.
@@ -242,7 +242,7 @@ export default function PlayPage() {
               <span className="text-[var(--color-brand-pink)]">böse</span>.
             </h1>
             <p className="text-base text-[var(--color-fg-muted)] leading-relaxed">
-              AUTO – die Ausbildung für die, die keinen KI Unfall bauen wollen.
+              AUTO – die Ausbildung für alle, die keinen KI Unfall bauen wollen.
             </p>
             <a
               href={ctaUrl}

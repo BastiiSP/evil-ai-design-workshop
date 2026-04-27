@@ -102,20 +102,20 @@ export const TOPICS: Record<
 > = {
   manipulation: {
     headline: "Manipulation & Nudging",
-    tagline: "KI, die dich in eine Richtung schiebt – ohne dass du es merkst.",
+    tagline: "KI, die uns in eine Richtung schiebt – ohne dass wir es merken.",
     example:
-      "Eine KI im Customer Service erkennt anhand deiner Tippgeschwindigkeit, dass du genervt bist – und schaltet auf besonders einfühlsame Sprache. Hilfreich? Oder taktisch?",
+      "Eine KI im Customer Service erkennt anhand unserer Tippgeschwindigkeit, dass wir genervt sind – und schaltet auf besonders einfühlsame Sprache. Hilfreich? Oder taktisch?",
     monsterPart: "eyes",
   },
   deception: {
     headline: "Täuschung & Intransparenz",
     tagline: "KI, die nicht zugibt, was sie ist.",
     example:
-      "Voice-Bots, die menschlich klingen sollen. Avatare mit Namen. Chatbots, die \u201Eich\u201C sagen, als w\u00E4ren sie ein Du.",
+      "Voice-Bots, die menschlich klingen sollen. Avatare mit Namen. Chatbots, die \u201Eich\u201C sagen, als w\u00E4ren sie ein Mensch.",
     monsterPart: "mouth",
   },
   discrimination: {
-    headline: "Diskriminierung durch Design",
+    headline: "Diskriminierung by Design",
     tagline: "KI, die Vorurteile verstärkt – statt sie aufzulösen.",
     example:
       "Ein Bewerber-Filter lernt aus alten Daten – und schließt alle aus, die nicht so aussehen wie der \u201EVergangenheits-Erfolg\u201C.",
@@ -123,7 +123,7 @@ export const TOPICS: Record<
   },
   addiction: {
     headline: "Abhängigkeit by Design",
-    tagline: "KI, die dich nicht gehen lassen will.",
+    tagline: "KI, die uns nicht gehen lassen will.",
     example:
       "Companion-Apps mit emotionaler Bindung. Streaks. Push-Notifications. Endlose Auto-Empfehlungen, die nie \u201EStop\u201C kennen.",
     monsterPart: "tentacles",
