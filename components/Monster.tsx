@@ -5,11 +5,10 @@ import type { MonsterState } from "@/lib/types";
 
 /**
  * Modulares Comic-Monster.
- * score < 0  → freundlich (Türkis, große Augen, Lächeln)
- * score > 0  → böse      (Pink-Glitch, Stacheln, Tentakeln, böse Augen)
+ * score < 0  → freundlich (Türkis, große Augen, Lächeln, türkise Beulen)
+ * score > 0  → böse      (Pink-Glitch, Stacheln, S-Tentakel, böse Augen, Zähne)
  *
  * Normalisierung: Wert -10..+10 → -1..+1 intern
- * Gestaltungsprinzip: dramatische Übergänge, gut sichtbar auf Beamer
  */
 export function Monster({
   state,
@@ -22,25 +21,23 @@ export function Monster({
 }) {
   const clamp = (v: number) => Math.max(-1, Math.min(1, v / 10));
 
-  const eyes = clamp(state.eyes);        // Manipulation
-  const mouth = clamp(state.mouth);      // Täuschung
-  const spikes = clamp(state.spikes);    // Diskriminierung
-  const tentacles = clamp(state.tentacles); // Abhängigkeit
-  const aura = clamp(state.aura);        // Gesamt-Stimmung
+  const eyes      = clamp(state.eyes);       // Manipulation
+  const mouth     = clamp(state.mouth);      // Täuschung
+  const spikes    = clamp(state.spikes);     // Diskriminierung
+  const tentacles = clamp(state.tentacles);  // Abhängigkeit
+  const aura      = clamp(state.aura);       // Gesamt-Stimmung
 
-  // Gesamtbösheit für globale Farbverschiebung
   const overallEvil = (eyes + mouth + spikes + tentacles + aura) / 5;
 
   const turquoise = "#87cdcb";
-  const pink = "#db73a6";
+  const pink      = "#db73a6";
 
-  // Körperfarbe interpoliert von Türkis (gut) nach Pink (böse)
   const bodyColor = overallEvil > 0 ? pink : turquoise;
-  const bodyAlt = overallEvil > 0 ? turquoise : pink;
+  const bodyAlt   = overallEvil > 0 ? turquoise : pink;
 
   return (
     <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-      {/* Aura-Glow – drastisch skaliert */}
+      {/* Aura-Glow */}
       <motion.div
         className="absolute inset-0 rounded-full pointer-events-none"
         animate={{
@@ -67,23 +64,68 @@ export function Monster({
           </filter>
         </defs>
 
-        {/* ── TENTAKELN (Abhängigkeit) ── wachsen unten raus, nur bei positivem score */}
+        {/* ── TENTAKEL (Abhängigkeit) ── */}
+
+        {/* BÖSE: S-förmige Tentakel mit Saugnäpfen */}
         {tentacles > 0 &&
           [-50, -25, 0, 25, 50].map((xBase, i) => {
-            const visible = tentacles; // 0..1
-            const length = 40 + visible * 90;
-            const wave = (i % 2 === 0 ? 1 : -1) * visible * 30;
+            const v   = tentacles;
+            const len = 55 + v * 75;
+            const wx  = (i % 2 === 0 ? 1 : -1) * (20 + v * 30);
+            const sw  = 5 + v * 8;
+            const mx  = xBase + wx;
+            const my  = 68 + len * 0.45;
+            const ex  = xBase - wx * 0.4;
+            const ey  = 68 + len;
             return (
-              <motion.path
-                key={`t${i}`}
-                d={`M ${xBase} 65 Q ${xBase + wave} ${65 + length * 0.5} ${xBase + wave * 1.5} ${65 + length}`}
-                stroke={pink}
-                strokeWidth={Math.max(4, 4 + visible * 8)}
-                strokeLinecap="round"
-                fill="none"
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 0.2 + visible * 0.8 }}
-                transition={{ duration: 1.2, ease: "easeOut", delay: i * 0.08 }}
+              <g key={`tg${i}`}>
+                <motion.path
+                  d={`M ${xBase} 68 Q ${xBase + wx * 1.3} ${68 + len * 0.28} ${mx} ${my} Q ${xBase - wx * 0.8} ${68 + len * 0.72} ${ex} ${ey}`}
+                  stroke={pink}
+                  strokeWidth={sw}
+                  strokeLinecap="round"
+                  fill="none"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 0.75 + v * 0.25 }}
+                  transition={{ duration: 1.3, ease: "easeOut", delay: i * 0.1 }}
+                />
+                {/* Saugnäpfe – erscheinen ab mittlerer Bösheit */}
+                {v > 0.25 && (
+                  <>
+                    <motion.circle
+                      cx={xBase + wx * 0.9} cy={68 + len * 0.25}
+                      r={2 + v * 2} fill={turquoise}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: [0, v * 0.9, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, delay: 0.8 + i * 0.15 }}
+                    />
+                    <motion.circle
+                      cx={xBase - wx * 0.3} cy={68 + len * 0.62}
+                      r={1.5 + v * 1.5} fill={turquoise}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: [0, v * 0.8, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, delay: 1.2 + i * 0.15 }}
+                    />
+                  </>
+                )}
+              </g>
+            );
+          })}
+
+        {/* FREUNDLICH: türkise Beulen an der Unterseite */}
+        {tentacles < -0.3 &&
+          [-40, -20, 0, 20, 40].map((x, i) => {
+            const v = Math.min(1, (-tentacles - 0.3) / 0.7);
+            return (
+              <motion.ellipse
+                key={`ft${i}`}
+                cx={x} cy={70}
+                rx={5 + v * 5} ry={4 + v * 5}
+                fill={turquoise}
+                initial={{ opacity: 0, scaleY: 0 }}
+                animate={{ opacity: 0.45 + v * 0.35, scaleY: 1 }}
+                transition={{ duration: 0.7, delay: i * 0.1, ease: "backOut" }}
+                style={{ transformOrigin: `${x}px 74px` }}
               />
             );
           })}
@@ -91,11 +133,11 @@ export function Monster({
         {/* ── STACHELN (Diskriminierung) ── ring außen, nur bei positivem score */}
         {spikes > 0 &&
           Array.from({ length: 12 }).map((_, i) => {
-            const angle = (i / 12) * Math.PI * 2;
-            const visible = spikes; // 0..1
-            const r1 = 82;
-            const r2 = 82 + 15 + visible * 45;
-            const width = 2 + visible * 5;
+            const angle   = (i / 12) * Math.PI * 2;
+            const visible = spikes;
+            const r1      = 82;
+            const r2      = 82 + 15 + visible * 45;
+            const width   = 2 + visible * 5;
             return (
               <motion.line
                 key={`s${i}`}
@@ -128,17 +170,19 @@ export function Monster({
         />
 
         {/* ── AUGEN (Manipulation) ── */}
-        {/* Linkes Auge – Weiß: böse = breiter Squint, gut = großes rundes Auge */}
+
+        {/* LINKES AUGE */}
+        {/* Augapfel – böse: breiter Squint, gut: großes rundes Auge */}
         <motion.ellipse
           cx={-27} cy={-18}
           animate={{
             rx: eyes < 0 ? 14 - eyes * 2 : 14 + eyes * 6,
-            ry: 14 - eyes * 6,   // böse: schmal (=8 bei max), gut: groß (=20 bei max)
+            ry: 14 - eyes * 6,   // böse: schmal (~8), neutral: 14, gut: groß (~20)
           }}
           fill="#f5f5f5"
           transition={{ duration: 0.9, ease: "easeOut" }}
         />
-        {/* Rosa Iris – erscheint erst bei evil */}
+        {/* Rosa Iris – nur bei evil */}
         {eyes > 0 && (
           <motion.circle
             cx={-27 + eyes * 5} cy={-18 - eyes * 3}
@@ -149,17 +193,21 @@ export function Monster({
             transition={{ duration: 0.6 }}
           />
         )}
-        {/* Pupille */}
+        {/* Pupille – NUR bei evil zur Nase/oben verschieben; bei gut zentriert */}
         <motion.circle
           cx={-27} cy={-18}
           animate={{
-            r: eyes > 0 ? 3 : 7,
-            cx: -27 + eyes * 5,    // zur Nase hin
-            cy: -18 - eyes * 3,    // leicht nach oben – bedrohlicher Blick
+            r:  eyes > 0 ? 3 : 7,
+            cx: -27 + Math.max(0, eyes) * 5,
+            cy: -18 - Math.max(0, eyes) * 3,
           }}
           fill="#0a0a0a"
           transition={{ duration: 0.9 }}
         />
+        {/* Glanzpunkt – freundliche/neutrale Augen */}
+        {eyes <= 0.1 && (
+          <circle cx={-32} cy={-22} r={2.5} fill="white" opacity={0.75} />
+        )}
         {/* Glow bei evil */}
         {eyes > 0.2 && (
           <motion.ellipse
@@ -171,7 +219,7 @@ export function Monster({
             transition={{ duration: 2, repeat: Infinity }}
           />
         )}
-        {/* Augenbraue: böse = zur Nase runter-geneigt (V-Form), gut = dezent gewölbt */}
+        {/* Augenbraue: böse = V-Form zur Nase, gut = sanfte Wölbung */}
         {eyes > 0.1 ? (
           <motion.path
             d={`M ${-38} ${-36 - eyes * 8} Q ${-27} ${-36 - eyes * 4} ${-16} ${-32}`}
@@ -187,7 +235,7 @@ export function Monster({
           />
         ) : null}
 
-        {/* Rechtes Auge */}
+        {/* RECHTES AUGE */}
         <motion.ellipse
           cx={27} cy={-18}
           animate={{
@@ -210,13 +258,16 @@ export function Monster({
         <motion.circle
           cx={27} cy={-18}
           animate={{
-            r: eyes > 0 ? 3 : 7,
-            cx: 27 - eyes * 5,
-            cy: -18 - eyes * 3,
+            r:  eyes > 0 ? 3 : 7,
+            cx: 27 - Math.max(0, eyes) * 5,
+            cy: -18 - Math.max(0, eyes) * 3,
           }}
           fill="#0a0a0a"
           transition={{ duration: 0.9 }}
         />
+        {eyes <= 0.1 && (
+          <circle cx={22} cy={-22} r={2.5} fill="white" opacity={0.75} />
+        )}
         {eyes > 0.2 && (
           <motion.ellipse
             cx={27 - eyes * 5} cy={-18 - eyes * 3}
@@ -244,28 +295,46 @@ export function Monster({
 
         {/* ── MUND (Täuschung) ── */}
         {mouth > 0.1 ? (
-          // Evil: falsches breites Lächeln mit Zähnen
+          // BÖSE: große ovale Öffnung mit langen Zähnen und Glühen
           <g>
-            <motion.path
-              d={`M -35 28 Q 0 ${50 + mouth * 20} 35 28 L 35 36 Q 0 ${55 + mouth * 15} -35 36 Z`}
+            {/* Mundöffnung als dunkles Oval */}
+            <motion.ellipse
+              cx={0} cy={35}
+              rx={30 + mouth * 10} ry={10 + mouth * 7}
               fill="#0a0a0a"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.5 }}
             />
-            {[-28, -18, -8, 2, 12, 22].map((x, i) => (
-              <motion.polygon
-                key={i}
-                points={`${x},28 ${x + 5},28 ${x + 2.5},${35 + mouth * 10}`}
-                fill="#f5f5f5"
-                initial={{ opacity: 0, scaleY: 0 }}
-                animate={{ opacity: 1, scaleY: 1 }}
-                transition={{ duration: 0.3, delay: 0.4 + i * 0.06 }}
-                style={{ transformOrigin: `${x + 2.5}px 28px` }}
+            {/* 5 große Zähne – starten an der Oberkante des Ovals */}
+            {[-24, -12, 0, 12, 24].map((x, i) => {
+              const topY = 35 - (10 + mouth * 7);       // Oberkante Oval
+              const tipY = 35 + (10 + mouth * 7) * 0.6; // ~60% Tiefe
+              return (
+                <motion.polygon
+                  key={i}
+                  points={`${x - 5},${topY} ${x + 5},${topY} ${x},${tipY}`}
+                  fill="#f5f5f5"
+                  initial={{ opacity: 0, scaleY: 0 }}
+                  animate={{ opacity: 1, scaleY: 1 }}
+                  transition={{ duration: 0.3, delay: 0.35 + i * 0.07 }}
+                  style={{ transformOrigin: `${x}px ${topY}px` }}
+                />
+              );
+            })}
+            {/* Pinkes Zungen-Glühen */}
+            {mouth > 0.4 && (
+              <motion.ellipse
+                cx={0} cy={40}
+                rx={14 + mouth * 6} ry={4 + mouth * 2}
+                fill={pink}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0.35, 0.65, 0.35] }}
+                transition={{ duration: 2.2, repeat: Infinity, delay: 0.9 }}
               />
-            ))}
+            )}
           </g>
         ) : (
-          // Good/Neutral: ehrliches Lächeln
+          // GUT/NEUTRAL: ehrliches Lächeln
           <motion.path
             d={`M -24 28 Q 0 ${38 + Math.max(0, -mouth) * 12} 24 28`}
             fill="none" stroke="#0a0a0a" strokeWidth={4} strokeLinecap="round"
@@ -274,7 +343,7 @@ export function Monster({
           />
         )}
 
-        {/* Wangen-Röte bei friendlich */}
+        {/* Wangen-Röte bei freundlich */}
         {overallEvil < -0.2 && (
           <>
             <circle cx={-55} cy={5} r={12} fill={turquoise} opacity={0.25} />
