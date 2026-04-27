@@ -278,7 +278,7 @@ export function ResultsSlide({
         {...fadeUp}
         className="text-sm uppercase tracking-[0.4em] text-[var(--color-brand-turquoise)]"
       >
-        Eure Antwort
+        Unsere Antwort
       </motion.div>
       <motion.h2
         {...fadeUp}
@@ -310,7 +310,7 @@ export function MonsterGrowSlide({
     eyes: "Augen",
     mouth: "Mund",
     spikes: "Stacheln",
-    tentacles: "Tentakeln",
+    tentacles: "Tentakel",
     aura: "Aura",
   };
   const partName = partNames[question.monsterPart] ?? question.monsterPart;
@@ -355,7 +355,7 @@ export function MonsterGrowSlide({
           {(() => {
             const remaining = Math.max(0, 5 - 1 - getResolvedQuestionIndex(question.id));
             if (remaining === 0) return "Das war die letzte Frage. Gleich kommt der große Reveal.";
-            return `Eure Antworten formen, was hier auf der Bühne entsteht. Noch ${remaining} ${remaining === 1 ? "Frage" : "Fragen"} zu gehen.`;
+            return `Unsere Antworten formen, was hier auf der Bühne entsteht. Noch ${remaining} ${remaining === 1 ? "Frage" : "Fragen"} zu gehen.`;
           })()}
         </motion.p>
       </div>
@@ -412,7 +412,7 @@ export function FinalRevealSlide({ monster }: { monster: MonsterState }) {
             color: "var(--color-brand-turquoise)",
           }
         : {
-            headline: "Das ist eure KI.",
+            headline: "Das ist unsere KI.",
             color: "var(--color-fg)",
           };
   return (
@@ -444,7 +444,9 @@ export function FinalRevealSlide({ monster }: { monster: MonsterState }) {
           transition={{ duration: 0.8, delay: 0.7 }}
           className="text-3xl text-[var(--color-fg-muted)] leading-snug"
         >
-          Genau das, was ihr entschieden habt.
+          Das ist das finale Design unserer Evil AI.
+          <br />
+          Genau das, was wir gemeinsam entschieden haben.
         </motion.p>
       </div>
     </div>
@@ -458,7 +460,7 @@ export function OutroBridgeSlide() {
         {...fadeUp}
         className="text-5xl font-light leading-tight text-[var(--color-fg-muted)]"
       >
-        Was ihr gerade gebaut habt,
+        Was wir gerade gebaut haben,
         <br />
         baut sich da draußen jeden Tag von selbst.
       </motion.p>

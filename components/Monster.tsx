@@ -50,7 +50,7 @@ export function Monster({
         transition={{ duration: 1.5, ease: "easeOut" }}
       />
 
-      <svg viewBox="-110 -130 220 280" width={size} height={size}>
+      <svg viewBox="-110 -130 220 290" width={size} height={size} style={{ overflow: "visible" }}>
         <defs>
           <radialGradient id="bodyGrad" cx="45%" cy="35%" r="65%">
             <stop offset="0%" stopColor={bodyAlt} stopOpacity="0.6" />
