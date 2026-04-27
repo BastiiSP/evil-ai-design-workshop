@@ -35,6 +35,7 @@ export default function PresenterPage() {
   const [joinUrl, setJoinUrl] = useState("");
   const [ctaUrl, setCtaUrl] = useState("");
   const [showDebug, setShowDebug] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Lade Passwort aus LocalStorage beim ersten Mount
   useEffect(() => {
@@ -102,6 +103,22 @@ export default function PresenterPage() {
     [setState, broadcastState, state.rev]
   );
 
+  // Fullscreen toggle
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
+  // Fullscreen state sync
+  useEffect(() => {
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
+
   // Keyboard navigation
   useEffect(() => {
     if (!password) return;
@@ -118,6 +135,8 @@ export default function PresenterPage() {
         goToSection(SECTIONS.length - 1);
       } else if (e.key.toLowerCase() === "d") {
         setShowDebug((s) => !s);
+      } else if (e.key.toLowerCase() === "f") {
+        toggleFullscreen();
       }
     };
     window.addEventListener("keydown", onKey);
@@ -285,6 +304,20 @@ export default function PresenterPage() {
           {section.kind === "cta" && <CtaSlide ctaUrl={ctaUrl} />}
         </motion.div>
       </AnimatePresence>
+
+      {/* Fullscreen-Button – groß und immer sichtbar oben links (neben Logo) */}
+      <button
+        onClick={toggleFullscreen}
+        title={isFullscreen ? "Vollbild beenden (F)" : "Vollbild (F)"}
+        className="absolute top-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/15 bg-black/40 text-[11px] uppercase tracking-widest text-[var(--color-fg-muted)] hover:border-[var(--color-brand-turquoise)] hover:text-[var(--color-brand-turquoise)] transition backdrop-blur"
+      >
+        {isFullscreen ? (
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>
+        ) : (
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+        )}
+        {isFullscreen ? "Vollbild beenden" : "Vollbild"}
+      </button>
 
       {/* Bottom controls (versteckt, klein) */}
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-3 text-[10px] uppercase tracking-widest text-[var(--color-fg-muted)] opacity-50 hover:opacity-100 transition">
