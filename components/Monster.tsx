@@ -4,8 +4,12 @@ import { motion } from "framer-motion";
 import type { MonsterState } from "@/lib/types";
 
 /**
- * Modulares Comic-Monster. Body-Parts skalieren je nach `state` (-10..+10).
- * Negativ = freundlich (Türkis-Glow, sanfte Form). Positiv = böse (Pink-Glitch, scharfe Formen).
+ * Modulares Comic-Monster.
+ * score < 0  → freundlich (Türkis, große Augen, Lächeln)
+ * score > 0  → böse      (Pink-Glitch, Stacheln, Tentakeln, böse Augen)
+ *
+ * Normalisierung: Wert -10..+10 → -1..+1 intern
+ * Gestaltungsprinzip: dramatische Übergänge, gut sichtbar auf Beamer
  */
 export function Monster({
   state,
@@ -16,249 +20,240 @@ export function Monster({
   size?: number;
   showLabel?: boolean;
 }) {
-  // Helper: Werte normalisieren
-  const norm = (v: number) => Math.max(-1, Math.min(1, v / 10));
-  const eyes = norm(state.eyes);
-  const mouth = norm(state.mouth);
-  const spikes = norm(state.spikes);
-  const tentacles = norm(state.tentacles);
-  const aura = norm(state.aura);
+  const clamp = (v: number) => Math.max(-1, Math.min(1, v / 10));
 
-  // Body-Farbe driftet mit aura
-  const bodyTurquoise = "#87cdcb";
-  const bodyPink = "#db73a6";
-  const bodyMix = aura >= 0 ? bodyPink : bodyTurquoise;
-  const bodyAlt = aura >= 0 ? bodyTurquoise : bodyPink;
-  const auraMagnitude = Math.abs(aura);
+  const eyes = clamp(state.eyes);        // Manipulation
+  const mouth = clamp(state.mouth);      // Täuschung
+  const spikes = clamp(state.spikes);    // Diskriminierung
+  const tentacles = clamp(state.tentacles); // Abhängigkeit
+  const aura = clamp(state.aura);        // Gesamt-Stimmung
+
+  // Gesamtbösheit für globale Farbverschiebung
+  const overallEvil = (eyes + mouth + spikes + tentacles + aura) / 5;
+
+  const turquoise = "#87cdcb";
+  const pink = "#db73a6";
+
+  // Körperfarbe interpoliert von Türkis (gut) nach Pink (böse)
+  const bodyColor = overallEvil > 0 ? pink : turquoise;
+  const bodyAlt = overallEvil > 0 ? turquoise : pink;
 
   return (
-    <div className="relative" style={{ width: size, height: size }}>
-      {/* Aura / Glow */}
+    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+      {/* Aura-Glow – drastisch skaliert */}
       <motion.div
-        className="absolute inset-0 rounded-full"
+        className="absolute inset-0 rounded-full pointer-events-none"
         animate={{
-          background: `radial-gradient(circle, ${bodyMix}55 0%, ${bodyMix}11 50%, transparent 75%)`,
-          scale: 1 + auraMagnitude * 0.3,
+          background: `radial-gradient(circle, ${bodyColor}${overallEvil > 0 ? "60" : "33"} 0%, ${bodyColor}11 55%, transparent 75%)`,
+          scale: 1 + Math.max(0, overallEvil) * 0.5,
         }}
-        transition={{ duration: 1.2, ease: "easeOut" }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
       />
 
-      <svg
-        viewBox="-100 -120 200 240"
-        width={size}
-        height={size}
-        className="relative"
-      >
+      <svg viewBox="-110 -130 220 280" width={size} height={size}>
         <defs>
-          <radialGradient id="bodyGradient" cx="50%" cy="40%" r="60%">
-            <stop offset="0%" stopColor={bodyAlt} stopOpacity="0.85" />
-            <stop offset="60%" stopColor={bodyMix} stopOpacity="0.95" />
-            <stop offset="100%" stopColor="#212121" stopOpacity="1" />
+          <radialGradient id="bodyGrad" cx="45%" cy="35%" r="65%">
+            <stop offset="0%" stopColor={bodyAlt} stopOpacity="0.6" />
+            <stop offset="50%" stopColor={bodyColor} stopOpacity="0.95" />
+            <stop offset="100%" stopColor="#111" stopOpacity="1" />
           </radialGradient>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="2" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
+          <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
-          <filter id="glitch" x="-20%" y="-20%" width="140%" height="140%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" />
-            <feDisplacementMap in="SourceGraphic" scale={4 + auraMagnitude * 6} />
+          <filter id="glitchFx" x="-10%" y="-10%" width="120%" height="120%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="2" />
+            <feDisplacementMap in="SourceGraphic" scale={Math.max(0, overallEvil) * 10} />
           </filter>
         </defs>
 
-        {/* Tentakeln (unten, wachsen mit `tentacles`) */}
-        {[-1, -0.5, 0, 0.5, 1].map((offset, i) => {
-          const baseLength = 30;
-          const grow = Math.max(0, tentacles) * 70;
-          const length = baseLength + grow;
-          const x = offset * 35;
-          return (
-            <motion.path
-              key={`tentacle-${i}`}
-              d={`M ${x} 60 Q ${x + offset * 15} ${60 + length * 0.5}, ${x + offset * 25} ${60 + length}`}
-              stroke={bodyMix}
-              strokeWidth={6}
-              strokeLinecap="round"
-              fill="none"
-              opacity={tentacles > -0.3 ? 0.8 : 0.2}
-              animate={{ pathLength: 0.5 + Math.max(0, tentacles) * 0.5 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-            />
-          );
-        })}
+        {/* ── TENTAKELN (Abhängigkeit) ── wachsen unten raus, ab score > 0 */}
+        {tentacles > -0.5 &&
+          [-50, -25, 0, 25, 50].map((xBase, i) => {
+            const visible = Math.max(0, tentacles + 0.5); // 0..1
+            const length = 40 + visible * 90;
+            const wave = (i % 2 === 0 ? 1 : -1) * visible * 30;
+            return (
+              <motion.path
+                key={`t${i}`}
+                d={`M ${xBase} 65 Q ${xBase + wave} ${65 + length * 0.5} ${xBase + wave * 1.5} ${65 + length}`}
+                stroke={pink}
+                strokeWidth={Math.max(4, 4 + visible * 8)}
+                strokeLinecap="round"
+                fill="none"
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: 0.2 + visible * 0.8 }}
+                transition={{ duration: 1.2, ease: "easeOut", delay: i * 0.08 }}
+              />
+            );
+          })}
 
-        {/* Stacheln (Ring, wachsen mit `spikes`) */}
-        {Array.from({ length: 12 }).map((_, i) => {
-          const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
-          const baseR = 80;
-          const grow = Math.max(0, spikes) * 30;
-          const r1 = baseR + 5;
-          const r2 = baseR + 15 + grow;
-          const x1 = Math.cos(angle) * r1;
-          const y1 = Math.sin(angle) * r1;
-          const x2 = Math.cos(angle) * r2;
-          const y2 = Math.sin(angle) * r2;
-          return (
-            <motion.line
-              key={`spike-${i}`}
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke={bodyMix}
-              strokeWidth={Math.max(2, 2 + spikes * 3)}
-              strokeLinecap="round"
-              opacity={spikes > -0.3 ? 0.9 : 0.15}
-              animate={{
-                x2,
-                y2,
-                strokeWidth: Math.max(2, 2 + spikes * 3),
-              }}
-              transition={{ duration: 1.2, ease: "easeOut" }}
-            />
-          );
-        })}
+        {/* ── STACHELN (Diskriminierung) ── ring außen, ab score > 0 */}
+        {spikes > -0.5 &&
+          Array.from({ length: 12 }).map((_, i) => {
+            const angle = (i / 12) * Math.PI * 2;
+            const visible = Math.max(0, spikes + 0.5);
+            const r1 = 82;
+            const r2 = 82 + 15 + visible * 45;
+            const width = 2 + visible * 5;
+            return (
+              <motion.line
+                key={`s${i}`}
+                x1={Math.cos(angle) * r1}
+                y1={Math.sin(angle) * r1}
+                x2={Math.cos(angle) * r2}
+                y2={Math.sin(angle) * r2}
+                stroke={pink}
+                strokeWidth={width}
+                strokeLinecap="round"
+                initial={{ opacity: 0, scale: 0.3 }}
+                animate={{ opacity: 0.2 + visible * 0.8, scale: 1 }}
+                transition={{ duration: 0.9, ease: "backOut", delay: i * 0.05 }}
+                style={{ transformOrigin: "0px 0px" }}
+              />
+            );
+          })}
 
-        {/* Körper (Blob) */}
+        {/* ── KÖRPER ── */}
         <motion.ellipse
-          cx={0}
-          cy={0}
-          rx={75}
-          ry={75}
-          fill="url(#bodyGradient)"
+          cx={0} cy={0}
+          rx={78} ry={78}
+          fill="url(#bodyGrad)"
           animate={{
-            rx: 75 + (aura > 0 ? aura * 5 : 0),
-            ry: 75 + (aura > 0 ? aura * -3 : aura * 2),
+            rx: 78 + Math.max(0, overallEvil) * 8,
+            ry: 78 - Math.max(0, overallEvil) * 4,
           }}
           transition={{ duration: 1.2, ease: "easeOut" }}
-          filter={aura > 0.3 ? "url(#glitch)" : undefined}
+          filter={overallEvil > 0.4 ? "url(#glitchFx)" : undefined}
         />
 
-        {/* Augen */}
-        <g>
-          {/* Linkes Auge */}
-          <motion.circle
-            cx={-25}
-            cy={-15}
-            r={14}
-            fill="#f5f5f5"
-            animate={{
-              r: 14 + Math.abs(eyes) * 4,
-            }}
-            transition={{ duration: 1, ease: "easeOut" }}
+        {/* ── AUGEN (Manipulation) ── */}
+        {/* Linkes Auge */}
+        <motion.ellipse
+          cx={-27} cy={-18}
+          animate={{
+            rx: eyes > 0 ? 10 + eyes * 8 : 14 - eyes * 4,
+            ry: eyes > 0 ? 16 + eyes * 10 : 14 - eyes * 3,
+          }}
+          fill="#f5f5f5"
+          transition={{ duration: 0.9, ease: "easeOut" }}
+        />
+        <motion.circle
+          cx={-27} cy={-18}
+          animate={{
+            r: eyes > 0 ? 4 : 7,
+            cx: -27 + eyes * 4,
+          }}
+          fill="#0a0a0a"
+          transition={{ duration: 0.9 }}
+        />
+        {/* Glühen bei evil */}
+        {eyes > 0.2 && (
+          <motion.ellipse
+            cx={-27} cy={-18}
+            rx={10 + eyes * 8} ry={16 + eyes * 10}
+            fill="none" stroke={pink} strokeWidth={2}
+            opacity={eyes * 0.8}
+            filter="url(#glow)"
+            animate={{ opacity: [eyes * 0.5, eyes * 0.9, eyes * 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
           />
-          <motion.circle
-            cx={-25}
-            cy={-15}
-            r={6}
-            fill={eyes > 0 ? "#212121" : "#212121"}
-            animate={{
-              r: eyes > 0 ? 4 : 7, // bei "evil" verengen sich die Pupillen
-              cx: -25 + eyes * 3,
-            }}
-            transition={{ duration: 1, ease: "easeOut" }}
+        )}
+        {/* Hochgezogene böse Augenbraue */}
+        {eyes > 0.1 && (
+          <motion.path
+            d={`M ${-37} ${-32} Q ${-27} ${-38 - eyes * 8} ${-17} ${-32}`}
+            stroke="#0a0a0a" strokeWidth={3} fill="none" strokeLinecap="round"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
           />
-          {/* Hypnose-Spirale wenn evil */}
-          {eyes > 0.3 && (
-            <motion.circle
-              cx={-25}
-              cy={-15}
-              r={10}
-              fill="none"
-              stroke={bodyPink}
-              strokeWidth={1}
-              opacity={eyes}
-              animate={{ rotate: 360 }}
-              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-              style={{ transformOrigin: "-25px -15px" }}
-              strokeDasharray="2 4"
-            />
-          )}
+        )}
 
-          {/* Rechtes Auge */}
-          <motion.circle
-            cx={25}
-            cy={-15}
-            r={14}
-            fill="#f5f5f5"
-            animate={{
-              r: 14 + Math.abs(eyes) * 4,
-            }}
-            transition={{ duration: 1, ease: "easeOut" }}
+        {/* Rechtes Auge */}
+        <motion.ellipse
+          cx={27} cy={-18}
+          animate={{
+            rx: eyes > 0 ? 10 + eyes * 8 : 14 - eyes * 4,
+            ry: eyes > 0 ? 16 + eyes * 10 : 14 - eyes * 3,
+          }}
+          fill="#f5f5f5"
+          transition={{ duration: 0.9, ease: "easeOut" }}
+        />
+        <motion.circle
+          cx={27} cy={-18}
+          animate={{
+            r: eyes > 0 ? 4 : 7,
+            cx: 27 + eyes * 4,
+          }}
+          fill="#0a0a0a"
+          transition={{ duration: 0.9 }}
+        />
+        {eyes > 0.2 && (
+          <motion.ellipse
+            cx={27} cy={-18}
+            rx={10 + eyes * 8} ry={16 + eyes * 10}
+            fill="none" stroke={pink} strokeWidth={2}
+            opacity={eyes * 0.8}
+            filter="url(#glow)"
+            animate={{ opacity: [eyes * 0.5, eyes * 0.9, eyes * 0.5] }}
+            transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
           />
-          <motion.circle
-            cx={25}
-            cy={-15}
-            r={6}
-            fill="#212121"
-            animate={{
-              r: eyes > 0 ? 4 : 7,
-              cx: 25 + eyes * 3,
-            }}
-            transition={{ duration: 1, ease: "easeOut" }}
+        )}
+        {eyes > 0.1 && (
+          <motion.path
+            d={`M ${17} ${-32} Q ${27} ${-38 - eyes * 8} ${37} ${-32}`}
+            stroke="#0a0a0a" strokeWidth={3} fill="none" strokeLinecap="round"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
           />
-          {eyes > 0.3 && (
-            <motion.circle
-              cx={25}
-              cy={-15}
-              r={10}
-              fill="none"
-              stroke={bodyPink}
-              strokeWidth={1}
-              opacity={eyes}
-              animate={{ rotate: -360 }}
-              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-              style={{ transformOrigin: "25px -15px" }}
-              strokeDasharray="2 4"
-            />
-          )}
-        </g>
+        )}
 
-        {/* Mund */}
-        {mouth > 0 ? (
-          // Evil-Mode: zu viele Zähne, falsches Lächeln
+        {/* ── MUND (Täuschung) ── */}
+        {mouth > 0.1 ? (
+          // Evil: falsches breites Lächeln mit Zähnen
           <g>
             <motion.path
-              d="M -30 25 Q 0 50, 30 25 L 30 30 L -30 30 Z"
-              fill="#212121"
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8 }}
+              d={`M -35 28 Q 0 ${50 + mouth * 20} 35 28 L 35 36 Q 0 ${55 + mouth * 15} -35 36 Z`}
+              fill="#0a0a0a"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
             />
-            {/* Zähne */}
-            {[-25, -15, -5, 5, 15, 25].map((x, i) => (
+            {[-28, -18, -8, 2, 12, 22].map((x, i) => (
               <motion.polygon
                 key={i}
-                points={`${x},25 ${x + 4},25 ${x + 2},${25 + 5 + mouth * 5}`}
+                points={`${x},28 ${x + 5},28 ${x + 2.5},${35 + mouth * 10}`}
                 fill="#f5f5f5"
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
+                initial={{ opacity: 0, scaleY: 0 }}
+                animate={{ opacity: 1, scaleY: 1 }}
+                transition={{ duration: 0.3, delay: 0.4 + i * 0.06 }}
+                style={{ transformOrigin: `${x + 2.5}px 28px` }}
               />
             ))}
           </g>
         ) : (
-          // Good-Mode: ehrliches, freundliches Lächeln
+          // Good/Neutral: ehrliches Lächeln
           <motion.path
-            d={`M -22 25 Q 0 ${30 + Math.max(0, -mouth) * 8}, 22 25`}
-            fill="none"
-            stroke="#212121"
-            strokeWidth={4}
-            strokeLinecap="round"
-            animate={{
-              d: `M -22 25 Q 0 ${30 + Math.max(0, -mouth) * 8}, 22 25`,
-            }}
+            d={`M -24 28 Q 0 ${38 + Math.max(0, -mouth) * 12} 24 28`}
+            fill="none" stroke="#0a0a0a" strokeWidth={4} strokeLinecap="round"
+            animate={{ d: `M -24 28 Q 0 ${38 + Math.max(0, -mouth) * 12} 24 28` }}
             transition={{ duration: 1, ease: "easeOut" }}
           />
+        )}
+
+        {/* Wangen-Röte bei friendlich */}
+        {overallEvil < -0.2 && (
+          <>
+            <circle cx={-55} cy={5} r={12} fill={turquoise} opacity={0.25} />
+            <circle cx={55} cy={5} r={12} fill={turquoise} opacity={0.25} />
+          </>
         )}
       </svg>
 
       {showLabel && (
-        <div className="absolute -bottom-6 left-0 right-0 text-center text-xs text-[var(--color-fg-muted)] uppercase tracking-widest">
-          Eyes {state.eyes.toFixed(1)} · Mouth {state.mouth.toFixed(1)} · Spikes{" "}
-          {state.spikes.toFixed(1)} · Tentacles {state.tentacles.toFixed(1)} ·
-          Aura {state.aura.toFixed(1)}
+        <div className="absolute -bottom-8 left-0 right-0 text-center text-[10px] text-[var(--color-fg-muted)] uppercase tracking-widest font-mono">
+          👁 {state.eyes.toFixed(1)} · 👄 {state.mouth.toFixed(1)} ·
+          🗡 {state.spikes.toFixed(1)} · 🐙 {state.tentacles.toFixed(1)} ·
+          ✨ {state.aura.toFixed(1)}
         </div>
       )}
     </div>

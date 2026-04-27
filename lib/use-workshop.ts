@@ -9,25 +9,18 @@ import {
   type WorkshopState,
 } from "./types";
 import { INITIAL_STATE } from "./types";
+import { clearVotes } from "./client-id";
 import type { Channel } from "pusher-js";
 
 const VOTES_STORAGE_KEY = "evil-ai-presenter-votes";
 const STATE_STORAGE_KEY = "evil-ai-presenter-state";
 
-/**
- * Subscribes to the workshop channel.
- * - Wenn `presenter=true`: Lädt persistierten State+Votes aus localStorage,
- *   speichert Updates dorthin (Crash-Resilience).
- * - Sonst: Hört nur passiv mit, hält State und Votes im Memory.
- */
 export function useWorkshop({ presenter = false }: { presenter?: boolean }) {
   const [state, setState] = useState<WorkshopState>(() => {
-    if (presenter && typeof window !== "undefined") {
+    if (typeof window !== "undefined") {
       const stored = window.localStorage.getItem(STATE_STORAGE_KEY);
       if (stored) {
-        try {
-          return JSON.parse(stored) as WorkshopState;
-        } catch {}
+        try { return JSON.parse(stored) as WorkshopState; } catch {}
       }
     }
     return INITIAL_STATE;
@@ -37,13 +30,14 @@ export function useWorkshop({ presenter = false }: { presenter?: boolean }) {
     if (presenter && typeof window !== "undefined") {
       const stored = window.localStorage.getItem(VOTES_STORAGE_KEY);
       if (stored) {
-        try {
-          return JSON.parse(stored) as VotePayload[];
-        } catch {}
+        try { return JSON.parse(stored) as VotePayload[]; } catch {}
       }
     }
     return [];
   });
+
+  // resetCount – inkrementiert bei jedem Reset, damit Play-Page reagieren kann
+  const [resetCount, setResetCount] = useState(0);
 
   const channelRef = useRef<Channel | null>(null);
 
@@ -54,20 +48,19 @@ export function useWorkshop({ presenter = false }: { presenter?: boolean }) {
 
     const onState = (newState: WorkshopState) => {
       setState((prev) => {
-        // rev-basiertes Tie-Breaking: ignoriere ältere Updates
-        if (typeof newState.rev === "number" && newState.rev < prev.rev) {
-          return prev;
-        }
+        if (typeof newState.rev === "number" && newState.rev < prev.rev) return prev;
         return newState;
       });
+      // Auch Player-Seite cached State für Reconnect
+      if (!presenter && typeof window !== "undefined") {
+        window.localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(newState));
+      }
     };
 
     const onVote = (payload: VotePayload) => {
       setVotes((prev) => {
-        // Doppelte Votes desselben Clients zur selben Frage werden überschrieben
         const filtered = prev.filter(
-          (v) =>
-            !(v.questionId === payload.questionId && v.clientId === payload.clientId)
+          (v) => !(v.questionId === payload.questionId && v.clientId === payload.clientId)
         );
         return [...filtered, payload];
       });
@@ -75,6 +68,9 @@ export function useWorkshop({ presenter = false }: { presenter?: boolean }) {
 
     const onReset = () => {
       setVotes([]);
+      setResetCount((c) => c + 1);
+      // Voted-Flags in LocalStorage löschen (für alle Clients)
+      clearVotes();
       if (presenter && typeof window !== "undefined") {
         window.localStorage.removeItem(VOTES_STORAGE_KEY);
       }
@@ -84,15 +80,27 @@ export function useWorkshop({ presenter = false }: { presenter?: boolean }) {
     channel.bind(PUSHER_EVENTS.VOTE, onVote);
     channel.bind(PUSHER_EVENTS.RESET, onReset);
 
+    // Reconnect bei Rückkehr aus Hintergrund (Smartphone-Fix)
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        const p = getPusherClient();
+        if (p.connection.state !== "connected") {
+          p.connect();
+        }
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     return () => {
       channel.unbind(PUSHER_EVENTS.STATE, onState);
       channel.unbind(PUSHER_EVENTS.VOTE, onVote);
       channel.unbind(PUSHER_EVENTS.RESET, onReset);
       pusher.unsubscribe(PUSHER_CHANNEL);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [presenter]);
 
-  // Persistenz: Presenter speichert State+Votes
+  // Persistenz Presenter
   useEffect(() => {
     if (!presenter || typeof window === "undefined") return;
     window.localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(state));
@@ -103,5 +111,5 @@ export function useWorkshop({ presenter = false }: { presenter?: boolean }) {
     window.localStorage.setItem(VOTES_STORAGE_KEY, JSON.stringify(votes));
   }, [votes, presenter]);
 
-  return { state, setState, votes, setVotes };
+  return { state, setState, votes, setVotes, resetCount };
 }

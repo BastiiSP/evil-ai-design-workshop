@@ -9,10 +9,10 @@ import { SECTIONS } from "@/lib/sections";
 import { getOrCreateClientId, hasVoted, markVoted } from "@/lib/client-id";
 
 export default function PlayPage() {
-  const { state } = useWorkshop({ presenter: false });
+  const { state, resetCount } = useWorkshop({ presenter: false });
   const [clientId, setClientId] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
-  const [justVoted, setJustVoted] = useState<string | null>(null); // optionId
+  const [justVoted, setJustVoted] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ctaUrl, setCtaUrl] = useState("");
 
@@ -24,12 +24,26 @@ export default function PlayPage() {
     );
   }, []);
 
+  // Bei Reset: justVoted zurücksetzen (voted-Flags wurden bereits in use-workshop cleared)
+  useEffect(() => {
+    if (resetCount === 0) return;
+    setJustVoted(null);
+    setError(null);
+  }, [resetCount]);
+
   const questions = useMemo(() => getQuestions(), []);
   const section = SECTIONS[state.slideIndex];
-  const activeQuestion =
-    section?.kind === "vote" && "questionId" in section
-      ? questions.find((q) => q.id === section.questionId)
-      : undefined;
+
+  // Voting ist aktiv auf vote- UND results-Slides, solange votingOpen
+  const activeQuestion = useMemo(() => {
+    if (!state.votingOpen) return undefined;
+    const s = section;
+    if (!s) return undefined;
+    if ((s.kind === "vote" || s.kind === "results") && "questionId" in s) {
+      return questions.find((q) => q.id === s.questionId);
+    }
+    return undefined;
+  }, [section, state.votingOpen, questions]);
 
   // Wenn die Question wechselt, Reset des "just voted"-Banners
   useEffect(() => {
@@ -73,10 +87,12 @@ export default function PlayPage() {
   const screen = (() => {
     if (!section) return "wait";
     if (section.kind === "cta") return "cta";
-    if (section.kind === "vote" && activeQuestion) {
+    // Voting-UI: aktiv wenn votingOpen und Frage vorhanden (vote + results Slides)
+    if (activeQuestion && state.votingOpen) {
       if (justVoted || (clientId && hasVoted(activeQuestion.id))) return "voted";
       return "vote";
     }
+    // Bereits gevoted, Voting ist aber geschlossen → Ergebnisse-Screen
     if (
       section.kind === "results" ||
       section.kind === "monster-grow" ||

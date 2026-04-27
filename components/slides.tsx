@@ -451,26 +451,114 @@ export function FinalRevealSlide({ monster }: { monster: MonsterState }) {
 
 export function OutroBridgeSlide() {
   return (
-    <div className="flex flex-col items-start justify-center gap-8 max-w-5xl">
-      <motion.p {...fadeUp} className="text-5xl font-light leading-tight">
-        Dein Monster steht da.
+    <div className="flex flex-col items-start justify-center gap-10 max-w-5xl">
+      <motion.p
+        {...fadeUp}
+        className="text-5xl font-light leading-tight text-[var(--color-fg-muted)]"
+      >
+        Was ihr gerade gebaut habt,
+        <br />
+        baut sich da draußen jeden Tag von selbst.
       </motion.p>
       <motion.p
         {...fadeUp}
-        transition={{ duration: 0.8, delay: 0.6 }}
+        transition={{ duration: 0.8, delay: 0.8 }}
         className="text-5xl font-light leading-tight"
       >
-        Aber: KI fährt nicht von allein in die richtige Richtung.
+        Nicht weil jemand{" "}
+        <span className="text-[var(--color-brand-pink)]">böse</span> ist.
+        <br />
+        Sondern weil niemand am{" "}
+        <span className="text-[var(--color-brand-turquoise)]">Steuer</span> sitzt.
       </motion.p>
       <motion.p
         {...fadeUp}
-        transition={{ duration: 0.8, delay: 1.4 }}
-        className="text-6xl leading-tight"
+        transition={{ duration: 0.8, delay: 1.8 }}
+        className="text-6xl font-bold leading-tight"
       >
-        Wie ein <span className="text-[var(--color-brand-turquoise)]">Auto</span>{" "}
-        braucht sie jemanden am{" "}
-        <span className="text-[var(--color-brand-pink)]">Steuer</span>.
+        Und ein Auto ohne Steuer fährt.
+        <br />
+        <span className="text-[var(--color-brand-pink)]">Nur nicht dorthin, wo du willst.</span>
       </motion.p>
+    </div>
+  );
+}
+
+/** Comic-Auto-Crash-Animation: Auto fährt rein → Explosion → AUTO-Logo erscheint */
+function CarCrashAnimation() {
+  return (
+    <div className="relative w-[340px] h-[180px] overflow-hidden">
+      {/* Wand */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="absolute right-0 top-0 bottom-0 w-10 rounded-l-md"
+        style={{ background: "linear-gradient(180deg, #87cdcb33, #87cdcb88)" }}
+      />
+
+      {/* Auto (fährt von links nach rechts, crasht) */}
+      <motion.div
+        className="absolute top-1/2 -translate-y-1/2"
+        initial={{ x: -120 }}
+        animate={{ x: [null, 220, 208] }}
+        transition={{ duration: 1.1, times: [0, 0.7, 1], ease: "easeIn", delay: 0.3 }}
+      >
+        <svg viewBox="0 0 80 40" width="80" height="40">
+          {/* Karosserie */}
+          <rect x="5" y="15" width="65" height="20" rx="5" fill="#db73a6" />
+          <rect x="18" y="6" width="38" height="14" rx="4" fill="#c45e8f" />
+          {/* Fenster */}
+          <rect x="22" y="9" width="14" height="9" rx="2" fill="#87cdcb" opacity="0.7" />
+          <rect x="38" y="9" width="14" height="9" rx="2" fill="#87cdcb" opacity="0.7" />
+          {/* Räder */}
+          <circle cx="20" cy="36" r="7" fill="#212121" />
+          <circle cx="20" cy="36" r="3" fill="#444" />
+          <circle cx="55" cy="36" r="7" fill="#212121" />
+          <circle cx="55" cy="36" r="3" fill="#444" />
+          {/* Scheinwerfer */}
+          <circle cx="71" cy="22" r="3" fill="#fff" opacity="0.9" />
+        </svg>
+      </motion.div>
+
+      {/* Explosion */}
+      <motion.div
+        className="absolute right-4 top-1/2 -translate-y-1/2 text-5xl"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: [0, 1.6, 1.2], opacity: [0, 1, 0.9] }}
+        transition={{ delay: 1.3, duration: 0.5, ease: "backOut" }}
+      >
+        💥
+      </motion.div>
+
+      {/* Evil AI Label am Auto */}
+      <motion.div
+        className="absolute top-2 left-8 text-[10px] uppercase tracking-widest text-[var(--color-brand-pink)]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
+        Evil AI
+      </motion.div>
+
+      {/* AUTO erscheint nach Crash */}
+      <motion.div
+        className="absolute inset-0 flex items-center justify-center"
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 1.9, duration: 0.6, ease: "backOut" }}
+      >
+        <span
+          className="text-6xl font-extrabold tracking-tight"
+          style={{
+            background: "linear-gradient(135deg, #87cdcb 0%, #db73a6 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          AUTO
+        </span>
+      </motion.div>
     </div>
   );
 }
@@ -478,17 +566,28 @@ export function OutroBridgeSlide() {
 export function CtaSlide({ ctaUrl }: { ctaUrl: string }) {
   return (
     <div className="grid grid-cols-[1fr_auto] gap-16 items-center max-w-7xl w-full">
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-6">
+        {/* Animation */}
         <motion.div
-          {...fadeUp}
-          className="text-sm uppercase tracking-[0.4em] text-[var(--color-brand-turquoise)]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="mb-2"
         >
-          AI Automation Engineer
+          <CarCrashAnimation />
         </motion.div>
+
+        <motion.p
+          {...fadeUp}
+          transition={{ duration: 0.8, delay: 2.2 }}
+          className="text-2xl font-light text-[var(--color-fg-muted)] leading-snug"
+        >
+          Weil KI nicht von allein in die richtige Richtung fährt –
+        </motion.p>
         <motion.h2
           {...fadeUp}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-7xl font-bold leading-tight"
+          transition={{ duration: 0.8, delay: 2.6 }}
+          className="text-6xl font-bold leading-tight"
         >
           <span className="text-[var(--color-brand-turquoise)]">AUTO</span>matisch gut
           <br />
@@ -497,26 +596,27 @@ export function CtaSlide({ ctaUrl }: { ctaUrl: string }) {
         </motion.h2>
         <motion.p
           {...fadeUp}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="text-3xl font-light text-white"
+          transition={{ duration: 0.8, delay: 3.0 }}
+          className="text-2xl font-light text-white"
         >
-          Werde AI Automation Engineer.
+          Werde <strong>AI Automation Engineer</strong>.
         </motion.p>
         <motion.p
           {...fadeUp}
-          transition={{ duration: 0.8, delay: 1.0 }}
-          className="text-xl text-[var(--color-fg-muted)] max-w-xl leading-relaxed"
+          transition={{ duration: 0.8, delay: 3.3 }}
+          className="text-lg text-[var(--color-fg-muted)] max-w-xl leading-relaxed"
         >
-          AUTO – die Ausbildung für die, die keinen KI Unfall bauen wollen.
+          AUTO – die Ausbildung für die, die keinen KI-Unfall bauen wollen.
         </motion.p>
       </div>
+
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+        transition={{ duration: 1, delay: 2.8, ease: "easeOut" }}
         className="flex flex-col items-center gap-3"
       >
-        <QrCode value={ctaUrl} size={300} />
+        <QrCode value={ctaUrl} size={280} />
         <div className="text-sm uppercase tracking-widest text-[var(--color-fg-muted)]">
           Mehr erfahren
         </div>

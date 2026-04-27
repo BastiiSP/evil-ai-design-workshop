@@ -83,14 +83,17 @@ export default function PresenterPage() {
   const goToSection = useCallback(
     (index: number) => {
       const target = Math.max(0, Math.min(SECTIONS.length - 1, index));
+      const targetSection = SECTIONS[target];
+      // Voting bleibt offen auf vote UND results – erst bei monster-grow schließen
+      const votingOpen =
+        targetSection.kind === "vote" || targetSection.kind === "results";
+      const questionId =
+        "questionId" in targetSection ? targetSection.questionId : undefined;
       const next: WorkshopState = {
-        phase: SECTIONS[target].kind === "vote" ? "vote-open" : "slide",
+        phase: targetSection.kind === "vote" ? "vote-open" : "slide",
         slideIndex: target,
-        currentQuestionId:
-          SECTIONS[target].kind === "vote"
-            ? (SECTIONS[target] as { questionId: string }).questionId
-            : undefined,
-        votingOpen: SECTIONS[target].kind === "vote",
+        currentQuestionId: questionId,
+        votingOpen,
         rev: state.rev + 1,
       };
       setState(next);
@@ -158,9 +161,18 @@ export default function PresenterPage() {
     setPwInput("");
   }
 
-  function handleResetVotes() {
-    if (!confirm("Alle bisherigen Stimmen verwerfen?")) return;
+  async function handleResetVotes() {
+    if (!confirm("Alle bisherigen Stimmen verwerfen? Alle Smartphones werden ebenfalls zurückgesetzt.")) return;
     window.localStorage.removeItem("evil-ai-presenter-votes");
+    // Reset-Event an alle Clients broadcasten (löscht voted-Flags auf Smartphones)
+    try {
+      await fetch("/api/reset", {
+        method: "POST",
+        headers: { "x-admin-password": password },
+      });
+    } catch (e) {
+      console.error("Reset broadcast failed:", e);
+    }
     window.location.reload();
   }
 
