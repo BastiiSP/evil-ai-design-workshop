@@ -1,26 +1,87 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: #0a0a0a;
+  --color-bg-soft: #161616;
+  --color-fg: #f5f5f5;
+  --color-fg-muted: #a0a0a0;
+  --color-brand-black: #212121;
+  --color-brand-turquoise: #87cdcb;
+  --color-brand-pink: #db73a6;
+  --color-evil: #db73a6;
+  --color-good: #87cdcb;
+
+  --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+
+  --animate-pulse-slow: pulse-slow 4s ease-in-out infinite;
+  --animate-glitch: glitch 0.3s ease-in-out;
+  --animate-float: float 6s ease-in-out infinite;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.9; }
+}
+
+@keyframes glitch {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(2px, -2px); }
+  60% { transform: translate(-1px, -1px); }
+  80% { transform: translate(1px, 1px); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+html, body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 80%, rgba(219, 115, 166, 0.18), transparent 60%),
+    radial-gradient(ellipse 50% 60% at 90% 20%, rgba(135, 205, 203, 0.18), transparent 60%),
+    var(--color-bg);
+  min-height: 100dvh;
+}
+
+.stage {
+  background:
+    radial-gradient(ellipse 70% 60% at 10% 90%, rgba(219, 115, 166, 0.22), transparent 65%),
+    radial-gradient(ellipse 60% 70% at 95% 10%, rgba(135, 205, 203, 0.22), transparent 65%),
+    #0a0a0a;
+}
+
+.text-glitch {
+  position: relative;
+}
+.text-glitch::before,
+.text-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0.7;
+  pointer-events: none;
+}
+.text-glitch::before {
+  color: var(--color-brand-pink);
+  transform: translate(-2px, 0);
+  mix-blend-mode: screen;
+}
+.text-glitch::after {
+  color: var(--color-brand-turquoise);
+  transform: translate(2px, 0);
+  mix-blend-mode: screen;
+}
+
+button, a {
+  -webkit-tap-highlight-color: transparent;
 }
