@@ -83,6 +83,7 @@ export const SECTIONS: Section[] = [
   { id: "meta-intro", kind: "meta-intro" },
   { id: "vote-q5", kind: "vote", questionId: "q5-responsibility" },
   { id: "results-q5", kind: "results", questionId: "q5-responsibility" },
+  { id: "monster-q5", kind: "monster-grow", questionId: "q5-responsibility" },
 
   // Großer Reveal & CTA
   { id: "final-reveal", kind: "final-reveal" },

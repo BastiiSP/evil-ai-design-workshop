@@ -33,7 +33,7 @@ export function CoverSlide() {
         transition={{ duration: 0.8, delay: 0.4 }}
         className="text-3xl font-light text-[var(--color-fg-muted)] max-w-3xl"
       >
-        Wenn KI nicht b&ouml;se will – aber Schaden anrichtet.
+        Heute bauen wir eine b&ouml;se KI. Absichtlich.
       </motion.p>
     </div>
   );
@@ -99,9 +99,9 @@ export function DefinitionSlide() {
         transition={{ duration: 0.8, delay: 0.9 }}
         className="text-3xl text-[var(--color-fg-muted)] leading-snug"
       >
-        Selten b&ouml;ser Wille.
+        Da drau&szlig;en entsteht sie t&auml;glich aus Versehen.
         <br />
-        Oft b&ouml;ses Ergebnis durch falsche Anreize.
+        Heute tun wir es mit Absicht.
       </motion.p>
     </div>
   );
@@ -123,7 +123,7 @@ export function OverviewSlide() {
         Vier Strömungen, ein Monster
       </motion.div>
       <motion.h2 {...fadeUp} transition={{ duration: 0.8, delay: 0.2 }} className="text-7xl font-light leading-tight">
-        Wir bauen es <span className="text-[var(--color-brand-pink)]">live</span>. Zusammen.
+        Wir bauen eine <span className="text-[var(--color-brand-pink)]">Evil AI</span> live. Zusammen.
       </motion.h2>
       <ul className="space-y-4 text-3xl mt-4">
         {items.map((it, i) => (
@@ -253,7 +253,7 @@ export function VoteSlide({
         </div>
       </div>
       <div className="flex flex-col items-center gap-3">
-        <QrCode value={joinUrl} size={260} />
+        <QrCode value={joinUrl} size={320} />
         <div className="text-sm uppercase tracking-widest text-[var(--color-fg-muted)]">
           Jetzt mitmachen
         </div>
@@ -352,9 +352,11 @@ export function MonsterGrowSlide({
           transition={{ duration: 0.8, delay: 0.9 }}
           className="text-xl text-[var(--color-fg-muted)] mt-4 max-w-md leading-relaxed"
         >
-          Eure Antworten formen, was hier auf der Bühne entsteht. Noch{" "}
-          {Math.max(0, 5 - 1 - getResolvedQuestionIndex(question.id))}{" "}
-          {(5 - 1 - getResolvedQuestionIndex(question.id)) === 1 ? "Frage" : "Fragen"} zu gehen.
+          {(() => {
+            const remaining = Math.max(0, 5 - 1 - getResolvedQuestionIndex(question.id));
+            if (remaining === 0) return "Das war die letzte Frage. Gleich kommt der große Reveal.";
+            return `Eure Antworten formen, was hier auf der Bühne entsteht. Noch ${remaining} ${remaining === 1 ? "Frage" : "Fragen"} zu gehen.`;
+          })()}
         </motion.p>
       </div>
     </div>
@@ -497,12 +499,15 @@ function CarCrashAnimation() {
         style={{ background: "linear-gradient(180deg, #87cdcb33, #87cdcb88)" }}
       />
 
-      {/* Auto (fährt von links nach rechts, crasht) */}
+      {/* Auto (fährt von links nach rechts, crasht, fährt danach aus dem Bild) */}
       <motion.div
         className="absolute top-1/2 -translate-y-1/2"
         initial={{ x: -120 }}
-        animate={{ x: [null, 220, 208] }}
-        transition={{ duration: 1.1, times: [0, 0.7, 1], ease: "easeIn", delay: 0.3 }}
+        animate={{ x: [null, 220, 208], opacity: [1, 1, 1, 0] }}
+        transition={{
+          x: { duration: 1.1, times: [0, 0.7, 1], ease: "easeIn", delay: 0.3 },
+          opacity: { duration: 0.35, delay: 1.45, times: [0, 0.1, 0.5, 1] },
+        }}
       >
         <svg viewBox="0 0 80 40" width="80" height="40">
           {/* Karosserie */}
@@ -616,7 +621,7 @@ export function CtaSlide({ ctaUrl }: { ctaUrl: string }) {
         transition={{ duration: 1, delay: 2.8, ease: "easeOut" }}
         className="flex flex-col items-center gap-3"
       >
-        <QrCode value={ctaUrl} size={280} />
+        <QrCode value={ctaUrl} size={360} />
         <div className="text-sm uppercase tracking-widest text-[var(--color-fg-muted)]">
           Mehr erfahren
         </div>

@@ -67,10 +67,10 @@ export function Monster({
           </filter>
         </defs>
 
-        {/* ── TENTAKELN (Abhängigkeit) ── wachsen unten raus, ab score > 0 */}
-        {tentacles > -0.5 &&
+        {/* ── TENTAKELN (Abhängigkeit) ── wachsen unten raus, nur bei positivem score */}
+        {tentacles > 0 &&
           [-50, -25, 0, 25, 50].map((xBase, i) => {
-            const visible = Math.max(0, tentacles + 0.5); // 0..1
+            const visible = tentacles; // 0..1
             const length = 40 + visible * 90;
             const wave = (i % 2 === 0 ? 1 : -1) * visible * 30;
             return (
@@ -88,11 +88,11 @@ export function Monster({
             );
           })}
 
-        {/* ── STACHELN (Diskriminierung) ── ring außen, ab score > 0 */}
-        {spikes > -0.5 &&
+        {/* ── STACHELN (Diskriminierung) ── ring außen, nur bei positivem score */}
+        {spikes > 0 &&
           Array.from({ length: 12 }).map((_, i) => {
             const angle = (i / 12) * Math.PI * 2;
-            const visible = Math.max(0, spikes + 0.5);
+            const visible = spikes; // 0..1
             const r1 = 82;
             const r2 = 82 + 15 + visible * 45;
             const width = 2 + visible * 5;
