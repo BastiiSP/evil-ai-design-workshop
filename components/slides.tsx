@@ -14,27 +14,45 @@ const fadeUp = {
   transition: { duration: 0.8, ease: "easeOut" as const },
 };
 
-export function CoverSlide() {
+export function CoverSlide({ joinUrl = "" }: { joinUrl?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center text-center gap-12">
-      <motion.h1
-        {...fadeUp}
-        className="text-[10rem] leading-none font-extrabold tracking-tight"
-      >
-        <span
-          className="text-glitch text-white"
-          data-text="Evil AI Design"
+    <div className="grid grid-cols-[1fr_auto] gap-16 items-center max-w-7xl w-full">
+      {/* Linke Seite: Titel */}
+      <div className="flex flex-col gap-8">
+        <motion.h1
+          {...fadeUp}
+          className="text-[8rem] leading-none font-extrabold tracking-tight"
         >
-          Evil AI Design
-        </span>
-      </motion.h1>
-      <motion.p
-        {...fadeUp}
-        transition={{ duration: 0.8, delay: 0.4 }}
-        className="text-3xl font-light text-[var(--color-fg-muted)] max-w-3xl"
-      >
-        Heute bauen wir eine b&ouml;se KI. Absichtlich.
-      </motion.p>
+          <span className="text-glitch text-white" data-text="Evil AI Design">
+            Evil AI Design
+          </span>
+        </motion.h1>
+        <motion.p
+          {...fadeUp}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="text-3xl font-light text-[var(--color-fg-muted)]"
+        >
+          Heute bauen wir eine b&ouml;se KI. Absichtlich.
+        </motion.p>
+      </div>
+
+      {/* Rechte Seite: QR-Code */}
+      {joinUrl && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+          className="flex flex-col items-center gap-4"
+        >
+          <div className="text-sm uppercase tracking-[0.3em] text-[var(--color-brand-pink)] mb-1">
+            Jetzt mitmachen
+          </div>
+          <QrCode value={joinUrl} size={320} />
+          <div className="text-base font-light text-[var(--color-fg-muted)] mt-1">
+            {joinUrl.replace(/^https?:\/\//, "")}
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }

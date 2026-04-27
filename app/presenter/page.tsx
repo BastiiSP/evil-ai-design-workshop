@@ -257,7 +257,7 @@ export default function PresenterPage() {
           transition={{ duration: 0.4 }}
           className="relative w-full max-w-7xl flex items-center justify-center"
         >
-          {section.kind === "cover" && <CoverSlide />}
+          {section.kind === "cover" && <CoverSlide joinUrl={joinUrl} />}
           {section.kind === "hook" && <HookSlide />}
           {section.kind === "definition" && <DefinitionSlide />}
           {section.kind === "overview" && <OverviewSlide />}
